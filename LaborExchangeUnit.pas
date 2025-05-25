@@ -40,6 +40,7 @@ Type
         BtnFindCandidates: TButton;
         BtnShowDeficitCandidates: TButton;
         BtnSearch: TButton;
+        BtnSort: TButton;
         Procedure FormCreate(Sender: TObject);
         Function FormHelp(Command: Word; Data: THelpEventData; Var CallHelp: Boolean): Boolean;
         Procedure ShowVacancies();
@@ -64,6 +65,7 @@ Type
         Procedure BtnFindCandidatesClick(Sender: TObject);
         Procedure BtnShowDeficitCandidatesClick(Sender: TObject);
         Procedure BtnSearchClick(Sender: TObject);
+        Procedure BtnSortClick(Sender: TObject);
     Private
         FileNotSaved: Boolean;
     Public Type
@@ -661,6 +663,7 @@ Begin
         BtnDelete.Enabled := False;
         BtnEdit.Enabled := False;
         BtnSearch.Enabled := False;
+        BtnSort.Enabled := False;
     End
     Else
     Begin
@@ -680,6 +683,7 @@ Begin
         Until TempNodePointer = Nil;
         SGMain.RowCount := I;
         BtnSearch.Enabled := True;
+        BtnSort.Enabled := True;
 
     End;
     If (CandidateList.Head <> Nil) And (VacancyList.Head <> Nil) Then
@@ -723,6 +727,7 @@ Begin
         BtnDelete.Enabled := False;
         BtnEdit.Enabled := False;
         BtnSearch.Enabled := False;
+        BtnSort.Enabled := False;
     End
     Else
     Begin
@@ -741,6 +746,7 @@ Begin
         Until TempNodePointer = Nil;
         SGMain.RowCount := I;
         BtnSearch.Enabled := True;
+        BtnSort.Enabled := True;
     End;
     If (CandidateList.Head <> Nil) And (VacancyList.Head <> Nil) Then
         BtnShowDeficitCandidates.Enabled := True
@@ -959,6 +965,129 @@ Begin
         Except
             MessageBox(LaborForm.Handle, 'Невозможно получить доступ к этому файлу', 'Внимание!', MB_ICONWARNING + MB_OK)
         End;
+End;
+
+Procedure TLaborForm.BtnSortClick(Sender: TObject);
+Var
+    Sorted, Current, NextNode, InsertPos: PCandidateNode;
+    VSorted, VCurrent, VNextNode, VInsertPos: PVacancyNode;
+Begin
+    If CBChoice.ItemIndex = 0 Then
+    Begin
+        If VacancyList.Head <> VacancyList.Tail Then
+        Begin
+
+            VSorted := Nil;
+            VCurrent := VacancyList.Head;
+
+            While VCurrent <> Nil Do
+            Begin
+                VNextNode := VCurrent^.Next;
+
+                VInsertPos := VSorted;
+                While (VInsertPos <> Nil) And (AnsiCompareText(VCurrent^.Speciality, VInsertPos^.Speciality) > 0) Do
+                    VInsertPos := VInsertPos^.Next;
+
+                If VInsertPos = Nil Then
+                Begin
+                    VCurrent^.Prev := Nil;
+                    VCurrent^.Next := Nil;
+                    If VSorted = Nil Then
+                        VSorted := VCurrent
+                    Else
+                    Begin
+                        Var
+                        VLast := VSorted;
+                        While VLast^.Next <> Nil Do
+                            VLast := VLast^.Next;
+                        VLast^.Next := VCurrent;
+                        VCurrent^.Prev := VLast;
+                    End;
+                End
+                Else
+                    If VInsertPos = VSorted Then
+                    Begin
+                        VCurrent^.Next := VSorted;
+                        VCurrent^.Prev := Nil;
+                        VSorted^.Prev := VCurrent;
+                        VSorted := VCurrent;
+                    End
+                    Else
+                    Begin
+                        VCurrent^.Next := VInsertPos;
+                        VCurrent^.Prev := VInsertPos^.Prev;
+                        VInsertPos^.Prev^.Next := VCurrent;
+                        VInsertPos^.Prev := VCurrent;
+                    End;
+
+                VCurrent := VNextNode;
+            End;
+
+            VacancyList.Head := VSorted;
+            VacancyList.Tail := VSorted;
+            While VacancyList.Tail^.Next <> Nil Do
+                VacancyList.Tail := VacancyList.Tail^.Next;
+        End;
+        ShowVacancies
+    End
+    Else
+    Begin
+        If CandidateList.Head <> CandidateList.Tail Then
+        Begin
+
+            Sorted := Nil;
+            Current := CandidateList.Head;
+
+            While Current <> Nil Do
+            Begin
+                NextNode := Current^.Next;
+
+                InsertPos := Sorted;
+                While (InsertPos <> Nil) And (AnsiCompareText(Current^.Speciality, InsertPos^.Speciality) > 0) Do
+                    InsertPos := InsertPos^.Next;
+
+                If InsertPos = Nil Then
+                Begin
+                    Current^.Prev := Nil;
+                    Current^.Next := Nil;
+                    If Sorted = Nil Then
+                        Sorted := Current
+                    Else
+                    Begin
+                        Var
+                        Last := Sorted;
+                        While Last^.Next <> Nil Do
+                            Last := Last^.Next;
+                        Last^.Next := Current;
+                        Current^.Prev := Last;
+                    End;
+                End
+                Else
+                    If InsertPos = Sorted Then
+                    Begin
+                        Current^.Next := Sorted;
+                        Current^.Prev := Nil;
+                        Sorted^.Prev := Current;
+                        Sorted := Current;
+                    End
+                    Else
+                    Begin
+                        Current^.Next := InsertPos;
+                        Current^.Prev := InsertPos^.Prev;
+                        InsertPos^.Prev^.Next := Current;
+                        InsertPos^.Prev := Current;
+                    End;
+
+                Current := NextNode;
+            End;
+
+            CandidateList.Head := Sorted;
+            CandidateList.Tail := Sorted;
+            While CandidateList.Tail^.Next <> Nil Do
+                CandidateList.Tail := CandidateList.Tail^.Next;
+        End;
+        ShowCandidates
+    End;
 End;
 
 End.

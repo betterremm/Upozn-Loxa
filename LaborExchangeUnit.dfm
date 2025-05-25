@@ -111,6 +111,16 @@ object LaborForm: TLaborForm
     TabOrder = 7
     OnClick = BtnSearchClick
   end
+  object BtnSort: TButton
+    Left = 487
+    Top = 129
+    Width = 201
+    Height = 25
+    Caption = #1057#1086#1088#1090#1080#1088#1086#1074#1072#1090#1100' '#1087#1086' '#1089#1087#1077#1094#1080#1072#1083#1100#1085#1086#1089#1090#1080
+    Enabled = False
+    TabOrder = 8
+    OnClick = BtnSortClick
+  end
   object MainMenu1: TMainMenu
     Left = 728
     Top = 40
