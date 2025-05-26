@@ -464,6 +464,7 @@ Var
     TempCandidatePointer: PCandidateNode;
 Begin
     SearchForm := TSearchForm.Create(Self);
+    SearchForm.ShowModal;
     If SearchForm.ClosedByButton Then
     Begin
         If CBChoice.ItemIndex = 0 Then
